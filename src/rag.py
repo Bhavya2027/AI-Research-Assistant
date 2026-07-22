@@ -1,12 +1,14 @@
-def generate_answer(question, retrived_docs, llm):
+def generate_answer(question, retrieved_docs, llm):
     """
-    Generate an answer using the retrived document
+    Generate an answer using the retrieved documents.
     """
+
     context = "\n\n".join(
-        doc.page_content for doc in retrived_docs
+        doc.page_content for doc in retrieved_docs
     )
+
     prompt = f"""
-    You are a helpful AI Research Assistant.
+You are a helpful AI Research Assistant.
 
 Answer ONLY using the information provided in the context.
 

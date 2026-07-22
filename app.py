@@ -6,40 +6,70 @@ from src.retriever import load_vector_db, get_retriever
 from src.llm import get_llm
 from src.rag import generate_answer
 
-pdf_path = "data/pdfs/AI.pdf"
 
-# Step 1: Read PDF
-documents = load_pdf(pdf_path)
+def main():
 
-# Step 2: Split into chunks
-chunks = split_documents(documents)
+    print("=" * 50)
+    print("      AI Research Assistant")
+    print("=" * 50)
 
-# Step 3: Load embedding model
-embedding_model = get_embedding_model()
+    # Load PDF
+    pdf_path = "data/pdfs/AI.pdf"
+    documents = load_pdf(pdf_path)
 
-# Step 4: Create vector database
-create_vector_db(chunks, embedding_model)
+    # Split into chunks
+    chunks = split_documents(documents)
 
-# Step 5: Load vector database
-vector_db = load_vector_db(embedding_model)
+    # Load embedding model
+    embedding_model = get_embedding_model()
 
-# Step 6: Create retriever
-retriever = get_retriever(vector_db)
+    # Create Vector Database
+    create_vector_db(chunks, embedding_model)
 
-# Step 7: Load LLM
-llm = get_llm()
+    # Load Vector Database
+    vector_db = load_vector_db(embedding_model)
 
-# Step 8: Ask a question
-question = "What are embeddings?"
+    # Create Retriever
+    retriever = get_retriever(vector_db)
 
-# Step 9: Retrieve relevant chunks
-retrieved_docs = retriever.invoke(question)
+    # Load LLM
+    llm = get_llm()
 
-# Step 10: Generate answer
-answer = generate_answer(question, retrieved_docs, llm)
+    print("\nAI Research Assistant is Ready!")
+    print("Type 'exit' to quit.\n")
 
-print("\nQuestion:\n")
-print(question)
+    while True:
 
-print("\nAnswer:\n")
-print(answer)
+        query = input("Ask a Question: ")
+
+        if query.lower() in ["exit", "quit"]:
+            print("Goodbye!")
+            break
+
+        try:
+
+            print("Searching documents...")
+
+            retrieved_docs = retriever.invoke(query)
+
+            print(f"Retrieved {len(retrieved_docs)} document(s).")
+
+            answer = generate_answer(
+                query,
+                retrieved_docs,
+                llm
+            )
+
+            print("\nAnswer:\n")
+            print(answer)
+
+        except Exception as e:
+
+            print("\nERROR:")
+            print(e)
+
+        print("\n" + "-" * 60 + "\n")
+
+
+if __name__ == "__main__":
+    main()
