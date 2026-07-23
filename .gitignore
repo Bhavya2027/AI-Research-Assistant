@@ -1,20 +1,23 @@
-__pycache__/
-*.py[cod]
-*.pyo
-*.pyd
+# Virtual Environment
 venv/
-.venv/
-env/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment Variables
 .env
+
+# Chroma Database
+database/
+
+# VS Code
 .vscode/
-.idea/
+
+# Streamlit cache
+.streamlit/
+
+# OS files
 .DS_Store
 Thumbs.db
-.ipynb_checkpoints/
-build/
-dist/
-*.log
-.cache/
-chroma_db/
-.pytest_cache/
-database/

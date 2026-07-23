@@ -2,7 +2,7 @@ import os
 
 import streamlit as st
 
-from src.pdf_loader import load_pdf
+from src.pdf_loader import load_pdfs
 from src.splitter import split_documents
 from src.embeddings import get_embedding_model
 from src.vectordb import create_vector_db
@@ -31,7 +31,7 @@ def initialize():
     pdf_folder = "data/pdfs"
 
     # Load all PDFs
-    documents = load_pdf(pdf_folder)
+    documents = load_pdfs(pdf_folder)
 
     # Split into chunks
     chunks = split_documents(documents)
