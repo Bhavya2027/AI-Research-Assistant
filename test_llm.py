@@ -1,0 +1,9 @@
+from src.llm import get_llm
+
+llm = get_llm()
+
+response = llm.invoke("What is AI?")
+
+print(type(response))
+print(type(response.content))
+print(response)
