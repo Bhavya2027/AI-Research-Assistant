@@ -1,3 +1,5 @@
+import os
+
 from langchain_core.prompts import PromptTemplate
 from src.web_search import search_web
 
@@ -7,17 +9,14 @@ def extract_text(response):
     Convert Gemini/LangChain response into plain text.
     """
 
-    # AIMessage
     if hasattr(response, "content"):
         content = response.content
     else:
         content = response
 
-    # Already a string
     if isinstance(content, str):
         return content.strip()
 
-    # Gemini sometimes returns a list
     if isinstance(content, list):
 
         text = ""
@@ -36,7 +35,6 @@ def extract_text(response):
 
         return text.strip()
 
-    # Fallback
     return str(content).strip()
 
 
@@ -45,35 +43,47 @@ def answer_question(
     retriever,
     llm,
     chat_history,
-    pdf_name,
+    pdf_name=None,
 ):
     """
     Answer using:
-    - PDF
+
+    - Multiple PDFs
     - Web Search
     - Conversation History
     """
 
-    # --------------------------------
-    # Retrieve PDF context
-    # --------------------------------
+    # -----------------------------
+    # Retrieve Relevant Chunks
+    # -----------------------------
     docs = retriever.invoke(question)
 
     pdf_context = "\n\n".join(
         doc.page_content for doc in docs
     )
 
-    # --------------------------------
+    # -----------------------------
     # Sources
-    # --------------------------------
+    # -----------------------------
     sources = []
 
-    if docs:
-        sources.append(f"✓ PDF ({pdf_name})")
+    pdf_sources = set()
 
-    # --------------------------------
+    for doc in docs:
+
+        source = doc.metadata.get("source")
+
+        if source:
+            pdf_sources.add(os.path.basename(source))
+
+    if pdf_sources:
+
+        for pdf in sorted(pdf_sources):
+            sources.append(f"✓ {pdf}")
+
+    # -----------------------------
     # Web Search
-    # --------------------------------
+    # -----------------------------
     try:
 
         web_context = search_web(question)
@@ -85,29 +95,33 @@ def answer_question(
             sources.append("✓ DuckDuckGo Search")
 
     except Exception:
+
         web_context = "No web results available."
 
-    # --------------------------------
+    # -----------------------------
     # Combined Context
-    # --------------------------------
+    # -----------------------------
     context = f"""
-PDF Information:
+PDF Information
+
 {pdf_context}
 
 --------------------------------
 
-Web Information:
+Web Information
+
 {web_context}
 """
 
-    # --------------------------------
+    # -----------------------------
     # Chat History
-    # --------------------------------
+    # -----------------------------
     history = ""
 
     for user, assistant in chat_history:
 
         history += f"""
+
 User:
 {user}
 
@@ -116,9 +130,9 @@ Assistant:
 
 """
 
-    # --------------------------------
+    # -----------------------------
     # Prompt
-    # --------------------------------
+    # -----------------------------
     prompt = PromptTemplate(
         input_variables=[
             "history",
@@ -133,11 +147,11 @@ Answer the user's question using the provided context.
 Rules:
 
 1. Prefer PDF information whenever available.
-2. Use web search only to supplement the answer.
+2. Use web search only if needed.
 3. Use conversation history if relevant.
-4. If the answer isn't in the PDF, use the web.
-5. Respond in clear Markdown.
-6. Do NOT mention that you are using PDF or web unless asked.
+4. If the answer is not found in the PDFs, use web search.
+5. Give clear and well-structured answers.
+6. Do not mention whether the information came from PDFs or the web unless asked.
 
 --------------------------------
 
@@ -167,26 +181,16 @@ Answer:
         question=question,
     )
 
-    # --------------------------------
+    # -----------------------------
     # LLM
-    # --------------------------------
+    # -----------------------------
     response = llm.invoke(final_prompt)
 
-    # --------------------------------
-    # Extract clean text
-    # --------------------------------
     final_answer = extract_text(response)
 
-    # Debug (remove later)
-    print("=" * 60)
-    print("TYPE:", type(final_answer))
-    print("=" * 60)
-    print(final_answer[:300])
-    print("=" * 60)
-
-    # --------------------------------
+    # -----------------------------
     # Sources
-    # --------------------------------
+    # -----------------------------
     if sources:
 
         final_answer += "\n\n---\n\n"

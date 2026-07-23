@@ -1,6 +1,6 @@
 import os
 
-from src.loader import load_pdf
+from src.pdf_loader import load_pdfs
 from src.splitter import split_documents
 from src.embeddings import get_embedding_model
 from src.vectordb import create_vector_db
@@ -19,7 +19,7 @@ def main():
 
     # Load all PDFs
     print("\nLoading PDF(s)...")
-    documents = load_pdf(pdf_folder)
+    documents = load_pdfs(pdf_folder)
 
     # Get PDF names for source citation
     pdf_files = [

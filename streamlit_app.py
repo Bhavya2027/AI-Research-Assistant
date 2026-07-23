@@ -1,7 +1,8 @@
 import os
+
 import streamlit as st
 
-from src.loader import load_pdf
+from src.pdf_loader import load_pdf
 from src.splitter import split_documents
 from src.embeddings import get_embedding_model
 from src.vectordb import create_vector_db
